@@ -3,7 +3,7 @@
 
 ## 요구사항
 ### API End-Point
-- [ ] PATCH  `/point/{id}/charge` : 포인트를 충전한다.   
+- [x] PATCH  `/point/{id}/charge` : 포인트를 충전한다.   
 - [ ] PATCH `/point/{id}/use` : 포인트를 사용한다.   
 - [ ] GET `/point/{id}` : 포인트를 조회한다.   
 - [ ] GET `/point/{id}/histories` : 포인트 내역을 조회한다.
