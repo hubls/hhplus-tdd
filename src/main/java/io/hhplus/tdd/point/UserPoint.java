@@ -25,4 +25,18 @@ public record UserPoint(
 
         return new UserPoint(id, updatePoint, System.currentTimeMillis());
     }
+
+    public UserPoint use(long amount) {
+        if (amount <= MIN_POINT) {
+            throw new IllegalArgumentException("사용할 포인트가 0보다 커야합니다.");
+        }
+
+        long updatePoint = this.point - amount;
+
+        if (updatePoint < MIN_POINT) {
+            throw new IllegalArgumentException(String.format("잔고부족: 보유한 포인트 %d기 때문에 포인트를 사용할 수 없습니다.", this.point));
+        }
+
+        return new UserPoint(id, updatePoint, System.currentTimeMillis());
+    }
 }
