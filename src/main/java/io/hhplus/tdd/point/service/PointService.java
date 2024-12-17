@@ -27,7 +27,9 @@ public class PointService {
         Lock lock = userLocks.computeIfAbsent(userId, id -> new ReentrantLock(true));
 
         // 다른 쓰레드가 접근 못하도록 제어
+        log.info("Attempting to acquire lock for user ID: {}", userId);
         lock.lock();
+        log.info("Lock acquired for user ID: {}", userId);
         try {
             // 실제 비즈니스 로직
             UserPoint userPoint = userPointRepository.findById(userId);
@@ -39,6 +41,7 @@ public class PointService {
             throw e; // 예외를 다시 던진다.
         } finally {
             lock.unlock();
+            log.info("Lock released for user ID: {}", userId);
         }
     }
 }
