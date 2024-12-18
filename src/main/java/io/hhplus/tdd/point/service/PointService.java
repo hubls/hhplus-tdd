@@ -67,4 +67,8 @@ public class PointService {
             log.info("Lock released for user ID: {}", userId);
         }
     }
+
+    public UserPoint getUserPoint(long userId) {
+        return userPointRepository.findById(userId);
+    }
 }
