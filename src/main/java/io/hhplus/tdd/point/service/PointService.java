@@ -60,7 +60,7 @@ public class PointService {
             pointHistoryRepository.save(userId, amount, TransactionType.USE, System.currentTimeMillis());
             return userPointRepository.saveOrUpdate(userId, updatedUserpoint.point());
         } catch (IllegalArgumentException e) {
-            log.error("Error charging user points for user {}: {}", userId, e.getMessage());
+            log.error("Error using user points for user {}: {}", userId, e.getMessage());
             throw e; // 예외를 다시 던진다.
         } finally {
             lock.unlock();
