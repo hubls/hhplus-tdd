@@ -1,5 +1,6 @@
 package io.hhplus.tdd.point.service;
 
+import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -70,5 +72,9 @@ public class PointService {
 
     public UserPoint getUserPoint(long userId) {
         return userPointRepository.findById(userId);
+    }
+
+    public List<PointHistory> getUserPointHistories(long userId) {
+        return pointHistoryRepository.findAllById(userId);
     }
 }
