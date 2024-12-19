@@ -116,7 +116,7 @@ userId를 기반으로, ReentrantLock을 생성한다. 이때 true로 한 것은
 
 ### ⚠️ 테스트 코드에서 발견한 한 가지 의문
 
-![img.png](img2/img2.png)
+![img.png](img/img2.png)
 ```
 19:09:59.953 [pool-1-thread-4] INFO io.hhplus.tdd.point.service.PointService -- Attempting to acquire lock for user ID: 123
 19:09:59.952 [pool-1-thread-2] INFO io.hhplus.tdd.point.service.PointService -- Attempting to acquire lock for user ID: 123
