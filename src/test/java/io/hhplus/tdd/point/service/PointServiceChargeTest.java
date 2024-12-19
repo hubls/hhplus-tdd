@@ -1,86 +1,93 @@
 package io.hhplus.tdd.point.service;
 
+import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
-import org.junit.jupiter.api.DisplayName;
+import io.hhplus.tdd.point.repository.PointHistoryRepository;
+import io.hhplus.tdd.point.repository.UserPointRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class PointServiceChargeTest {
-    @Autowired
+    @Mock
+    private UserPointRepository userPointRepository;
+
+    @Mock
+    private PointHistoryRepository pointHistoryRepository;
+
+    @InjectMocks
     private PointService pointService;
 
     @Test
-    @DisplayName("최초 유저의 포인트가 잘 충전 되었는지 확인")
-    void save() {
+    void 최초_유저_포인트_충전_성공() {
         // given
         long userId = 123L;
         long amount = 5_000L;
+        UserPoint newUserPoint = new UserPoint(userId, 0L, System.currentTimeMillis());
+        UserPoint updatedUserPoint = new UserPoint(userId, amount, System.currentTimeMillis());
 
         // when
-        UserPoint userPoint = pointService.chargeUserPoint(userId, amount);
+        when(userPointRepository.findById(eq(userId))).thenReturn(newUserPoint);
+        when(userPointRepository.saveOrUpdate(eq(userId), eq(amount))).thenReturn(updatedUserPoint);
+
+        UserPoint result = pointService.chargeUserPoint(userId, amount);
 
         // then
-        assertThat(userPoint.id()).isEqualTo(userId);
-        assertThat(userPoint.point()).isEqualTo(amount);
+        assertThat(result.point()).isEqualTo(amount);
+        verify(userPointRepository).findById(eq(userId));
+        verify(userPointRepository).saveOrUpdate(eq(userId), eq(amount));
+        verify(pointHistoryRepository).save(eq(userId), eq(amount), eq(TransactionType.CHARGE), anyLong());
     }
 
     @Test
-    @DisplayName("기존 유저가 포인트 충전 2회가 충전되었는지 확인")
-    void saveTwice() {
+    void 기존_유저_포인트_추가_충전() {
         // given
-        long userId = 456;
-        long amount = 5000;
-        long totalAmount = 10000;
+        long userId = 456L;
+        long initialAmount = 5_000L;
+        long additionalAmount = 5_000L;
+        long totalAmount = 10_000L;
 
-        // 최초 충전
-        UserPoint userPoint = pointService.chargeUserPoint(userId, amount);
+        UserPoint existingUserPoint = new UserPoint(userId, initialAmount, System.currentTimeMillis());
+        UserPoint updatedUserPoint = new UserPoint(userId, totalAmount, System.currentTimeMillis());
 
-        // when (2회 충전)
-        UserPoint updatedUserPoint = pointService.chargeUserPoint(userId, amount);
+        // when
+        when(userPointRepository.findById(eq(userId))).thenReturn(existingUserPoint);
+        when(userPointRepository.saveOrUpdate(eq(userId), eq(totalAmount))).thenReturn(updatedUserPoint);
+
+        // PointHistoryRepository 호출 검증
+        pointService.chargeUserPoint(userId, additionalAmount);
 
         // then
-        assertThat(updatedUserPoint.id()).isEqualTo(userId);
-        assertThat(updatedUserPoint.point()).isEqualTo(totalAmount);
+        verify(userPointRepository).findById(eq(userId));
+        verify(userPointRepository).saveOrUpdate(eq(userId), eq(totalAmount));
+        verify(pointHistoryRepository).save(eq(userId), eq(additionalAmount), eq(TransactionType.CHARGE), anyLong());
     }
 
     @Test
-    @DisplayName("신규 유저가 포인트 최대 충전을 넘어서려 할때")
-    void saveMaxPoint() {
+    void 포인트_초과_충전_실패() {
         // given
-        long userId = 789;
-        long amount = 1_000_000L;
+        long userId = 789L;
+        long maxPoint = 10_000L;
+        long exceedingAmount = 1_000_001L;
 
-        // when: 초과 충전 시도 (IllegalArgumentException 발생)
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            pointService.chargeUserPoint(userId, amount); // 초과 충전 1,000,000 추가 시도
-        });
+        UserPoint existingUserPoint = new UserPoint(userId, maxPoint, System.currentTimeMillis());
 
-        // then: 예외 메시지 검증
-        assertThat(exception.getMessage()).contains("충전가능한 최대 포인트");
-    }
+        // when
+        when(userPointRepository.findById(eq(userId))).thenReturn(existingUserPoint);
 
-    @Test
-    @DisplayName("기존 유저가 포인트 최대 충전을 넘어서려 할때")
-    void saveMaxPointTwice() {
-        // given
-        long userId = 111;
-        long amount = 10_000L;
-        long totalAmount = 1_000_000L;
+        // then
+        assertThatThrownBy(() -> pointService.chargeUserPoint(userId, exceedingAmount))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("충전가능한 최대 포인트");
 
-        // 최초 충전
-        UserPoint userPoint = pointService.chargeUserPoint(userId, amount);
-
-        // when: 초과 충전 시도 (IllegalArgumentException 발생)
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            pointService.chargeUserPoint(userId, totalAmount); // 초과 충전 1,000,000 추가 시도
-        });
-
-        // then: 예외 메시지 검증
-        assertThat(exception.getMessage()).contains("충전가능한 최대 포인트");
+        verify(userPointRepository).findById(eq(userId));
+        verify(pointHistoryRepository, never()).save(anyLong(), anyLong(), any(TransactionType.class), anyLong());
     }
 }
