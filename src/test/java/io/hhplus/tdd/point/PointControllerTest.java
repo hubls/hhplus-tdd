@@ -1,6 +1,7 @@
 package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.point.service.PointService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ class PointControllerTest {
 
     @MockBean
     private PointService pointService;
+
+    @BeforeEach
+    public void beforeEach() {}
 
     @Test
     @DisplayName("특정 유저의 포인트 조회할 수 있다.")
