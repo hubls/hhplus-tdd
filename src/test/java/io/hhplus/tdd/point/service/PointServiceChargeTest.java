@@ -4,6 +4,7 @@ import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.UserPointRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +25,9 @@ class PointServiceChargeTest {
 
     @InjectMocks
     private PointService pointService;
+
+    @BeforeEach
+    public void beforeEach() {}
 
     @Test
     void 최초_유저_포인트_충전_성공() {

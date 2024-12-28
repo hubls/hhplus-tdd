@@ -6,6 +6,7 @@ import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.UserPointRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,10 @@ public class PointServiceIntegrationTest {
 
     @Autowired
     PointHistoryRepository pointHistoryRepository;
+
+    @BeforeEach
+    public void beforeEach() {
+    }
 
     @Test
     public void 포인트충전_성공케이스() {
